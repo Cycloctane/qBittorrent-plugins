@@ -1,34 +1,35 @@
-# VERSION: 0.2
+# VERSION: 0.3
 # AUTHORS: Cycloctane (Cycloctane@octane.top)
 
 from typing import Union
 from xml.etree import ElementTree
 from http.client import HTTPSConnection
+from urllib.parse import urlparse
 
 from novaprinter import prettyPrinter
 
 # edit pt site url and passkey here.
-SITE_URL = ""
+SITE_URL = "https://"
 PASSKEY = ""
 
 # check catagories in /getrss.php
 CATAGORIES = {
-    'all': '', 'anime': '','games': '', 'movies': '',
+    'anime': '','games': '', 'movies': '',
     'music': '', 'software': '', 'tv': '',
 }
 
 
 class nexus:
 
-    name: str = "NexusRSSEngine"
+    name: str = "NexusRSS"
     url: str = SITE_URL
 
-    supported_categories: dict[str, str] = CATAGORIES
+    supported_categories: dict[str, str] = {'all': ''} | CATAGORIES
 
     @staticmethod
     def __print_message(msg: str) -> None:
-        prettyPrinter({'engine_url': f'https://{nexus.url}/','seeds': -1, 'leech': -1, 'size': 0,
-                        'name': msg, 'link': 'no link','desc_link': f'https://{nexus.url}/'})
+        prettyPrinter({'engine_url': nexus.url,'seeds': -1, 'leech': -1, 'size': 0,
+                        'name': msg, 'link': 'no link','desc_link': nexus.url})
 
     @staticmethod
     def __parse(text: str) -> None:
@@ -40,7 +41,7 @@ class nexus:
                 return
             for item in search_result.find("channel").findall("item"):
                 row: dict[str, Union[str, int, None]] = {
-                    'engine_url': f'https://{nexus.url}/','seeds': -1, 'leech': -1}
+                    'engine_url': nexus.url,'seeds': -1, 'leech': -1}
                 row['name'] = item.findtext("title")
                 row['link'] = item.find("enclosure").attrib.get('url', None)
                 row['size'] = item.find("enclosure").attrib.get('length', None)
@@ -51,7 +52,7 @@ class nexus:
 
     @staticmethod
     def __request(target: str, cat: str) -> str:
-        conn = HTTPSConnection(nexus.url, timeout=4)
+        conn = HTTPSConnection(urlparse(nexus.url).hostname, urlparse(nexus.url).port, timeout=4)
         conn.request("GET",
                      f"/torrentrss.php?search_mode=0&rows=50&passkey={PASSKEY}&search={target}{'&cat'+cat+'=1' if cat != '' else ''}&linktype=dl", 
                     headers={'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"})
@@ -62,7 +63,6 @@ class nexus:
 
     def search(self, what: str, cat: str = 'all') -> None:
         try:
-            response = nexus.__request(what, nexus.supported_categories[cat])
-            nexus.__parse(response)
+            nexus.__parse(nexus.__request(what, nexus.supported_categories[cat]))
         except Exception as e:
             nexus.__print_message("error: "+str(e))
