@@ -5,6 +5,7 @@ qb搜索插件。使用bt/pt站点的RSS接口进行搜索。
 目前支持：
 - mikanime: `MikanRSS` 适配mikanime.tv
 - NexusPHP：`NexusRSS` 适配使用NexusPHP且开启RSS功能的pt站点
+- 天雪: `SkyeySnow` 适配天雪论坛(pt)
 
 ## 使用方法
 
@@ -27,3 +28,8 @@ https://raw.githubusercontent.com/Cycloctane/qBittorrent-plugins/master/engines/
 3. 根据站点分类规则修改`CATAGORIES`(可选)。
 4. 在 qBittorrent -> 搜索 -> 搜索插件 -> 安装新插件 中从本地文件添加编辑后的nexus.py
 
+### 天雪
+
+1. 下载skyeysnow.py到本地：https://raw.githubusercontent.com/Cycloctane/qBittorrent-plugins/master/engines/skyeysnow.py
+2. 将passkey输入skyeysnow.py的`PASSKEY`。
+3. 在 qBittorrent -> 搜索 -> 搜索插件 -> 安装新插件 中从本地文件添加编辑后的skyeysnow.py
