@@ -26,22 +26,22 @@ class nexus:
 
     supported_categories: dict[str, str] = {'all': ''} | CATAGORIES
 
-    @staticmethod
-    def __print_message(msg: str) -> None:
-        prettyPrinter({'engine_url': nexus.url,'seeds': -1, 'leech': -1, 'size': 0,
-                        'name': msg, 'link': 'no link','desc_link': nexus.url})
+    @classmethod
+    def __print_message(cls, msg: str) -> None:
+        prettyPrinter({'engine_url': cls.url,'seeds': -1, 'leech': -1, 'size': 0,
+                        'name': msg, 'link': 'no link','desc_link': cls.url})
 
-    @staticmethod
-    def __parse(text: str) -> None:
+    @classmethod
+    def __parse(cls, text: str) -> None:
         if text == "invalid passkey": raise Exception("invalid passkey")
         try:
             search_result = ElementTree.fromstring(text)
             if len(search_result.find("channel").findall("item")) == 0:
-                nexus.__print_message("no results found")
+                cls.__print_message("no results found")
                 return
             for item in search_result.find("channel").findall("item"):
                 row: dict[str, Union[str, int, None]] = {
-                    'engine_url': nexus.url,'seeds': -1, 'leech': -1}
+                    'engine_url': cls.url,'seeds': -1, 'leech': -1}
                 row['name'] = item.findtext("title")
                 row['link'] = item.find("enclosure").attrib.get('url', None)
                 row['size'] = item.find("enclosure").attrib.get('length', None)
@@ -50,9 +50,9 @@ class nexus:
                 prettyPrinter(row)
         except (ElementTree.ParseError, AttributeError, KeyError): raise Exception("parse error")
 
-    @staticmethod
-    def __request(target: str, cat: str) -> str:
-        conn = HTTPSConnection(urlparse(nexus.url).hostname, urlparse(nexus.url).port, timeout=4)
+    @classmethod
+    def __request(cls, target: str, cat: str) -> str:
+        conn = HTTPSConnection(urlparse(cls.url).hostname, urlparse(cls.url).port, timeout=4)
         conn.request("GET",
                      f"/torrentrss.php?search_mode=0&rows=50&passkey={PASSKEY}&search={target}{'&cat'+cat+'=1' if cat != '' else ''}&linktype=dl", 
                     headers={'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"})
@@ -63,6 +63,6 @@ class nexus:
 
     def search(self, what: str, cat: str = 'all') -> None:
         try:
-            nexus.__parse(nexus.__request(what, nexus.supported_categories[cat]))
+            self.__parse(self.__request(what, self.supported_categories[cat]))
         except Exception as e:
-            nexus.__print_message("error: "+str(e))
+            self.__print_message("error: "+str(e))
