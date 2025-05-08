@@ -1,23 +1,19 @@
-# VERSION: 0.3
+# VERSION: 0.4
 # AUTHORS: Cycloctane (Cycloctane@octane.top)
 
-from http.client import HTTPSConnection
-from typing import Union
-from urllib.parse import urlparse
+import urllib.request
 from xml.etree import ElementTree
 
+from helpers import headers
 from novaprinter import prettyPrinter
 
 
 class mikan:
 
-    name: str = "MikanRSS"
-    url: str = "https://mikanime.tv"
+    name = "MikanProject"
+    url = "https://mikanime.tv"
 
-    supported_categories: dict[str, str] = {
-        'all': '',
-        'anime': ''
-    }
+    supported_categories = {'all': '', 'anime': ''}
 
     @classmethod
     def __print_message(cls, msg: str) -> None:
@@ -26,10 +22,10 @@ class mikan:
 
     @classmethod
     def __request(cls, target: str) -> str:
-        conn = HTTPSConnection(urlparse(cls.url).hostname, urlparse(cls.url).port, timeout=4)
-        conn.request("GET", f"/RSS/Search?searchstr={target}",
-                     headers={'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"})
-        res = conn.getresponse()
+        req = urllib.request.Request(
+            f"{cls.url}/RSS/Search?searchstr={target}", headers=headers
+        )
+        res = urllib.request.urlopen(req)
         if res.status != 200: raise Exception(f"http status code {res.status}")
         return res.read().decode('utf-8')
 
@@ -37,17 +33,11 @@ class mikan:
     def __parse(cls, text: str) -> None:
         try:
             search_result = ElementTree.fromstring(text)
-            if len(search_result.find("channel").findall("item")) == 0:
-                cls.__print_message("no results found")
-                return
             for item in search_result.find("channel").findall("item"):
-                row: dict[str, Union[str, int, None]] = {
-                    'engine_url': cls.url, 'seeds': -1, 'leech': -1
-                }
+                row = {'engine_url': cls.url, 'seeds': -1, 'leech': -1}
                 row['name'] = item.findtext("title")
-                row['link'] = item.find("enclosure").attrib.get('url', None)
-                row['size'] = item.find("enclosure").attrib.get('length', None)
-                if None in row.values(): raise Exception("parse error")
+                row['link'] = item.find("enclosure").attrib['url']
+                row['size'] = item.find("enclosure").attrib['length']
                 row['desc_link'] = item.findtext('link')
                 prettyPrinter(row)
         except (ElementTree.ParseError, AttributeError, KeyError):

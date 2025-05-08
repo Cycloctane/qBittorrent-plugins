@@ -1,17 +1,17 @@
 # qBittorrent-plugins
 
-qb搜索插件。使用bt/pt站点的RSS接口进行搜索。
+qbittorrent搜索插件。使用bt/pt站点的RSS接口进行搜索。
 
 目前支持：
-- mikanime: `MikanRSS` 适配mikanime.tv
-- NexusPHP：`NexusRSS` 适配使用NexusPHP且开启RSS功能的pt站点
-- 天雪: `SkyeySnow` 适配天雪论坛(pt)
+- mikan.py: Mikan Project (https://mikanime.tv)
+- nexus.py: 使用NexusPHP且开启RSS功能的pt站点
+- skyeysnow.py: 天雪论坛(pt)
 
 ## 使用方法
 
 参考https://github.com/qbittorrent/search-plugins/wiki/Install-search-plugins
 
-### mikanime
+### Mikan Project
 
 直接添加到qBittorrent搜索插件中。
 
